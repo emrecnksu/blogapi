@@ -1,0 +1,42 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: blog-api
+    ports:
+      - "80:8000"
+    volumes:
+      - .:/var/www
+    depends_on:
+      - db
+    networks:
+      - blog-api-network
+    environment:
+      - LC_ALL=tr_TR.UTF-8
+      - LANG=tr_TR.UTF-8
+
+  db:
+    image: mysql:8.0
+    container_name: blog-api-db
+    volumes:
+      - mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: blog-api-db
+      MYSQL_USER: laravel_user
+      MYSQL_PASSWORD: root
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    networks:
+      - blog-api-network
+
+networks:
+  blog-api-network:
+    external: true
+
+volumes:
+  mysql-data:
