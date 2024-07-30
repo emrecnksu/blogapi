@@ -15,7 +15,7 @@ class ActivatePosts extends Command
      *
      * @var string
      */
-    protected $signature = 'app:activate-posts';
+    protected $signature = 'app:CheckPosts-Status';
 
     /**
      * The console command description.

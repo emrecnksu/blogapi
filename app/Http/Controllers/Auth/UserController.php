@@ -4,96 +4,61 @@ namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Requests\LoginRequest;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\RegisterRequest;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Validator;
 
 class UserController
 {
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'surname' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string|min:4|confirmed',
-        ], [
-            'name.required' => 'Ad alanı boş bırakılmamalıdır',
-            'surname.required' => 'Soyad alanı boş bırakılmamalıdır',
-            'email.required' => 'E-posta alanı boş bırakılmamalıdır',
-            'email.unique' => 'Bu E-posta adresi zaten kullanılmaktadır',
-            'password.required' => 'Şifre alanı boş bırakılmamalıdır',
-            'password.min' => 'Şifre en az 4 karakter olmalıdır',
-            'password.confirmed' => 'Şifreler eşleşmiyor',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['status' => 0, 'error' => $validator->errors()->first()], 422);
-        }
+        $validated = $request->validated();
 
         $user = User::create([
-            'name' => $request->name,
-            'surname' => $request->surname,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name' => $validated['name'],
+            'surname' => $validated['surname'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
             'is_active' => false,
         ]);
 
         $user->assignRole('user');
 
-        return response()->json([
-            'status' => 1,
-            'name' => $user->name,
-            'surname' => $user->surname,
-            'message' => 'Kullanıcı kaydı başarıyla gerçekleştirildi ve admin onayı bekliyor.'
-        ], 201);
+        return (new UserResource($user))->additional(['message' => 'Kullanıcı kaydı başarıyla gerçekleştirildi ve admin onayı bekliyor.']);
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required',
-        ], [
-            'email.required' => 'E-posta alanı boş bırakılmamalıdır.',
-            'email.email' => 'Geçersiz e-posta adresi.',
-            'password.required' => 'Şifre alanı boş bırakılmamalıdır.',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['status' => 0, 'error' => $validator->errors()], 400);
-        }
+        $validated = $request->validated();
 
         $credentials = $request->only('email', 'password');
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $validated['email'])->first();
 
         if ($user && $user->is_active && Auth::attempt($credentials)) {
             $token = Auth::user()->createToken('LoginToken')->plainTextToken;
-
-            // Add user information to session //
-            Session::put('token', $token);
-            Session::put('user_id', $user->id); 
-            Session::put('name', $user->name);
-            Session::put('surname', $user->surname);
-
+    
             return response()->json([
-                'status' => 1,
-                'user_id' => $user->id,
-                'name' => $user->name,
-                'surname' => $user->surname,
-                'token' => $token,
-                'message' => 'Giriş işlemi başarıyla gerçekleşti!'
-            ], 200);
+                'data' => [
+                    'user' => new UserResource($user),
+                    'token' => $token,
+                ],
+                'message' => 'Giriş işlemi başarıyla gerçekleşti!',
+            ]);
         } else {
-            return response()->json(['status' => 0, 'error' => 'E-posta adresi veya şifre yanlış ya da kullanıcı pasif durumda!'], 401);
+            return response()->json([
+                'status' => 0,
+                'error' => 'E-posta adresi veya şifre yanlış ya da kullanıcı pasif durumda!'
+            ], 401);
         }
     }
 
     public function logout(Request $request)
     {
         if ($request->user()) {
-            $request->user()->currentAccessToken()->delete();
+            $request->user()->tokens()->delete();
             return response()->json(['message' => 'Başarıyla çıkış yapıldı.'], 200);
         } else {
             return response()->json(['message' => 'Oturumunuz açık değil. İlk önce oturum açmalısınız!'], 401);

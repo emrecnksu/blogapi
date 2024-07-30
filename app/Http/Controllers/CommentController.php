@@ -6,9 +6,10 @@ use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\CommentRequest;
 use App\Jobs\SendCommentNotification;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\CommentResource;
 
 class CommentController
 {
@@ -29,44 +30,34 @@ class CommentController
             return $commentsQuery->with('user')->get();
         });
 
-        return response()->json([
-            'status' => 1,
-            'comments' => $comments
-        ], 200);
+        return CommentResource::collection($comments);
     }
 
-    public function store(Request $request)
+    public function store(CommentRequest $request)
     {
+        $validated = $request->validated();
+
         if (!Auth::check()) {
             return response()->json(['status' => 0, 'message' => 'Yorum yapabilmek için giriş yapmalısınız.'], 401);
         }
 
-        $request->validate([
-            'post_id' => 'required|exists:posts,id',
-            'content' => 'required|string',
-        ]);
-
         $comment = Comment::create([
-            'post_id' => $request->post_id,
+            'post_id' => $validated['post_id'],
             'user_id' => Auth::id(),
-            'content' => $request->content,
+            'content' => $validated['content'],
             'approved' => false,
         ]);
 
         SendCommentNotification::dispatch($comment);
 
-        // Clear cache after successfully adding comment //
-        $this->clearCache($request->post_id);
+        $this->clearCache($validated['post_id']);
 
-        return response()->json([
-            'status' => 1,
-            'message' => 'Yorum başarıyla eklendi ve admin onayı bekliyor.',
-            'comment' => $comment
-        ], 201);
+        return (new CommentResource($comment))->additional(['message' => 'Yorum başarıyla eklendi ve admin onayı bekliyor.']);
     }
 
-    public function update(Request $request, $id)
+    public function update(CommentRequest $request, $id)
     {
+        $validated = $request->validated();
         $comment = Comment::find($id);
 
         if (!$comment) {
@@ -77,24 +68,16 @@ class CommentController
             return response()->json(['status' => 0, 'message' => 'Bu yorumu güncelleme yetkiniz yok'], 403);
         }
 
-        $validator = Validator::make($request->all(), [
-            'content' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['status' => 0, 'error' => $validator->errors()], 400);
-        }
-
         $comment->update([
-            'content' => $request->content,
+            'content' => $validated['content'],
         ]);
 
         $this->clearCache($comment->post_id);
 
-        return response()->json(['status' => 1, 'message' => 'Yorum başarıyla güncellendi', 'comment' => $comment], 200);
+        return (new CommentResource($comment))->additional(['message' => 'Yorum başarıyla güncellendi.']);
     }
 
-    public function delete(Request $request, $id)
+    public function delete($id)
     {
         $comment = Comment::find($id);
 
@@ -110,7 +93,7 @@ class CommentController
 
         $this->clearCache($comment->post_id);
 
-        return response()->json(['status' => 1, 'message' => 'Yorum başarıyla silindi'], 200);
+        return response()->json(['status' => 1, 'message' => 'Yorum başarıyla silindi.'], 200);
     }
 
     public function approve($id)
@@ -129,7 +112,7 @@ class CommentController
 
         $this->clearCache($comment->post_id);
 
-        return response()->json(['status' => 1, 'message' => 'Yorum başarıyla onaylandı', 'comment' => $comment], 200);
+        return (new CommentResource($comment))->additional(['message' => 'Yorum başarıyla onaylandı.']);
     }
 
     private function clearCache($postId = null)

@@ -44,9 +44,9 @@ $intervals = [
 foreach ($intervals as $method => $parameters) {
     if (!empty($parameters)) {
         foreach ($parameters as $parameter) {
-            $schedule->command('app:activate-posts')->$method($parameter);
+            $schedule->command('app:CheckPosts-Status')->$method($parameter);
         }
     } else {
-        $schedule->command('app:activate-posts')->$method();
+        $schedule->command('app:CheckPosts-Status')->$method();
     }
 }

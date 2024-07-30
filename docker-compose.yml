@@ -1,7 +1,7 @@
 services:
   api:
     build:
-      context: .
+      context: ./Docker
       dockerfile: Dockerfile
     image: blog-api
     ports:
@@ -22,13 +22,9 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
     environment:
-      MYSQL_ROOT_HOST: "%"
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: blog-api-db
-      MYSQL_USER: laravel_user
-      MYSQL_PASSWORD: root
-      MYSQL_CHARSET: utf8mb4
-      MYSQL_COLLATION: utf8mb4_unicode_ci
+   
     ports:
       - "3306:3306"
     networks:

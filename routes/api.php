@@ -28,6 +28,7 @@ Route::post('register', [UserController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);
 
 Route::get('categories', [CategoryController::class, 'index']);
+Route::get('categories/{id}/posts', [CategoryController::class, 'posts']);
 Route::get('categories/show/{id}', [CategoryController::class, 'show']);
 
 Route::get('/posts/related/{id}', [PostController::class, 'relatedPosts']);
@@ -36,8 +37,6 @@ Route::get('posts', [PostController::class, 'index']);
 Route::get('posts/show/{id}', [PostController::class, 'show']);
 
 Route::get('comments', [CommentController::class, 'index']);
-
-Route::get('categories/{id}/posts', [CategoryController::class, 'posts']);
 
 Route::get('/kvkk', [KvkkController::class, 'showkvkk']);
 

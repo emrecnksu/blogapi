@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\PostResource;
 use Illuminate\Support\Facades\Cache;
 
 class PostController
@@ -20,7 +18,7 @@ class PostController
             return Post::with(['category', 'user', 'tags'])->where('status', true)->get();
         });
 
-        return response()->json(['status' => 1, 'posts' => $posts], 200);
+        return PostResource::collection($posts);
     }
 
     public function show($id)
@@ -35,7 +33,7 @@ class PostController
             return response()->json(['status' => 0, 'message' => 'Post bulunamadı'], 404);
         }
 
-        return response()->json(['status' => 1, 'post' => $post], 200);
+        return new PostResource($post);
     }
 
     public function relatedPosts($id)
@@ -66,6 +64,6 @@ class PostController
             return ['relatedPosts' => $relatedPosts, 'isCategoryRelated' => $isCategoryRelated];
         });
 
-        return response()->json(['status' => 1, 'relatedPosts' => $relatedPosts['relatedPosts'], 'isCategoryRelated' => $relatedPosts['isCategoryRelated']], 200);
+        return response()->json(['status' => 1, 'relatedPosts' => PostResource::collection($relatedPosts['relatedPosts']), 'isCategoryRelated' => $relatedPosts['isCategoryRelated']], 200);
     }
 }

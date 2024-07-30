@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\PostResource;
+use App\Http\Resources\CategoryResource;
 
 class CategoryController
 {
@@ -20,7 +20,7 @@ class CategoryController
 
         $categories = $query->get();
 
-        return response()->json(['status' => 1, 'categories' => $categories], 200);
+        return CategoryResource::collection($categories);
     }
 
     public function show($id)
@@ -31,7 +31,7 @@ class CategoryController
             return response()->json(['status' => 0, 'message' => 'Kategori bulunamadı'], 404);
         }
 
-        return response()->json(['status' => 1, 'category' => $category], 200);
+        return new CategoryResource($category);
     }
 
     public function posts($id)
@@ -41,9 +41,10 @@ class CategoryController
 
         return response()->json([
             'status' => 1,
-            'category' => $category,
-            'posts' => $posts,
+            'data' => [
+                'category' => new CategoryResource($category),
+                'posts' => PostResource::collection($posts),
+            ]
         ], 200);
     }
 }
-
