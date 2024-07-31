@@ -25,8 +25,8 @@ class PostController
     {
         $cacheKey = 'post_'.$id;
 
-        $posts = Cache::remember($cacheKey, $this->cacheDuration, function() {
-            return Post::with(['category', 'user', 'tags'])->visible()->get();
+        $post = Cache::remember($cacheKey, $this->cacheDuration, function() use ($id) {
+            return Post::with(['category', 'user', 'tags'])->findOrFail($id);
         });
 
         if (!$post) {
