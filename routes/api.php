@@ -42,7 +42,7 @@ Route::get('/kvkk', [KvkkController::class, 'showkvkk']);
 
 Route::post('comments', [CommentController::class, 'store'])->middleware('checkAuth');
 
-Route::middleware('auth:sanctum' , 'checkAuth')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     Route::post('users/approve/{id}', [UserProfileController::class, 'approveUser']);
     Route::post('users/deactivate/{id}', [UserProfileController::class, 'deactivate']);
 

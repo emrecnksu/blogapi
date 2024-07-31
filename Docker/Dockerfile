@@ -47,7 +47,7 @@ RUN chmod +x /usr/local/bin/start-container
 # Çalışma dizinindeki izinleri düzenliyoruz
 RUN chown -R www-data:www-data /var/www
 
-# Uygulama 8181 portunda çalışacak
+# Uygulama 8000 portunda çalışacak
 EXPOSE 8000
 
 # start-container.sh dosyasını giriş noktası olarak ayarlıyoruz
