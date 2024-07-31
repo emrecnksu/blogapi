@@ -37,7 +37,7 @@ class CategoryController
     public function posts($id)
     {
         $category = Category::findOrFail($id);
-        $posts = Post::where('category_id', $id)->where('status', true)->with('user', 'tags')->get();
+        $posts = Post::where('category_id', $id)->visible()->with('user', 'tags')->get();
 
         return response()->json([
             'status' => 1,

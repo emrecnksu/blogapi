@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use Exception;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
@@ -27,7 +28,7 @@ class UserProfileController
                 'surname' => $validated['surname'] ?? $user->surname,
                 'email' => $validated['email'] ?? $user->email,
                 'password' => isset($validated['new_password']) ? Hash::make($validated['new_password']) : $user->password,
-            ]);
+            ]);            
 
             return (new UserResource($user))->additional(['message' => 'Profil başarıyla güncellendi.']);
         } catch (Exception $e) {

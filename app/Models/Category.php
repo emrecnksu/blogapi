@@ -47,4 +47,9 @@ class Category extends Model
     {
         return $this->hasMany(Post::class);
     }
+
+    public function scopeVisible($query)
+    {
+        return $query->where('status', true);
+    }
 }

@@ -15,7 +15,7 @@ class PostController
         $cacheKey = 'posts_all';
 
         $posts = Cache::remember($cacheKey, $this->cacheDuration, function() {
-            return Post::with(['category', 'user', 'tags'])->where('status', true)->get();
+            return Post::with(['category', 'user', 'tags'])->visible()->get();
         });
 
         return PostResource::collection($posts);
@@ -25,8 +25,8 @@ class PostController
     {
         $cacheKey = 'post_'.$id;
 
-        $post = Cache::remember($cacheKey, $this->cacheDuration, function() use ($id) {
-            return Post::with(['category', 'user', 'tags'])->findOrFail($id);
+        $posts = Cache::remember($cacheKey, $this->cacheDuration, function() {
+            return Post::with(['category', 'user', 'tags'])->visible()->get();
         });
 
         if (!$post) {
@@ -44,7 +44,7 @@ class PostController
             $post = Post::findOrFail($id);
             $relatedPosts = Post::where('category_id', $post->category_id)
                                  ->where('id', '!=', $id)
-                                 ->where('status', true)
+                                 ->visible()
                                  ->take(3)
                                  ->with('category')
                                  ->get();
@@ -52,7 +52,7 @@ class PostController
             $isCategoryRelated = true;
             if ($relatedPosts->count() < 3) {
                 $additionalPosts = Post::where('id', '!=', $id)
-                                       ->where('status', true)
+                                       ->visible()
                                        ->take(3 - $relatedPosts->count())
                                        ->with('category')
                                        ->get();

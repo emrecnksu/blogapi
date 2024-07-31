@@ -40,7 +40,9 @@ Route::get('comments', [CommentController::class, 'index']);
 
 Route::get('/kvkk', [KvkkController::class, 'showkvkk']);
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::post('comments', [CommentController::class, 'store'])->middleware('checkAuth');
+
+Route::middleware('auth:sanctum' , 'checkAuth')->group(function () {
     Route::post('users/approve/{id}', [UserProfileController::class, 'approveUser']);
     Route::post('users/deactivate/{id}', [UserProfileController::class, 'deactivate']);
 
@@ -50,7 +52,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('logout', [UserController::class, 'logout']);
 
-    Route::post('comments', [CommentController::class, 'store']);
     Route::put('comments/{id}', [CommentController::class, 'update']);
     Route::delete('comments/{id}', [CommentController::class, 'delete']);
 });

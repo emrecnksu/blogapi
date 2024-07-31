@@ -58,7 +58,7 @@ class UserController
     public function logout(Request $request)
     {
         if ($request->user()) {
-            $request->user()->tokens()->delete();
+            $request->user()->currentAccessToken()->delete();
             return response()->json(['message' => 'Başarıyla çıkış yapıldı.'], 200);
         } else {
             return response()->json(['message' => 'Oturumunuz açık değil. İlk önce oturum açmalısınız!'], 401);

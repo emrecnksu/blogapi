@@ -43,6 +43,17 @@ class PostSeeder extends Seeder
                 'end_date' => null
             ],
             [
+                'title' => 'Eğitimde Dijital Dönüşüm',
+                'content' => 'Dijital teknolojiler, eğitim alanında büyük değişikliklere yol açtı. Online derslerden, sanal gerçeklik kullanarak öğrenmeye kadar bir dizi yenilik öğrencilerin öğrenme deneyimini yeniden şekillendiriyor...',
+                'image' => 'https://cdn.yemek.com/mnresize/1250/833/uploads/2022/03/tart-kalibinda-elmali-turta-hr.jpg', // Bu görsel URL'sini uygun bir eğitim görseliyle değiştirin
+                'category_id' => Category::where('name', 'Eğitim')->first()->id,
+                'user_id' => $adminUser->id,
+                'tags' => ['Eğitim, Teknoloji'],
+                'status' => true,
+                'start_date' => now(),
+                'end_date' => null
+            ],            
+            [
                 'title' => '2024 İçin En İyi 5 Seyahat Noktası',
                 'content' => 'Bir sonraki tatilinizi planlıyorsanız, 2024 için bu en iyi beş destinasyonu göz önünde bulundurun...',
                 'image' => 'https://cdn.yemek.com/mnresize/1250/833/uploads/2022/03/tart-kalibinda-elmali-turta-hr.jpg',

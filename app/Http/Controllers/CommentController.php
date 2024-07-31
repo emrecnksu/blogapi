@@ -37,10 +37,6 @@ class CommentController
     {
         $validated = $request->validated();
 
-        if (!Auth::check()) {
-            return response()->json(['status' => 0, 'message' => 'Yorum yapabilmek için giriş yapmalısınız.'], 401);
-        }
-
         $comment = Comment::create([
             'post_id' => $validated['post_id'],
             'user_id' => Auth::id(),

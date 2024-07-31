@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class CheckUserIsActive
+class CheckAuth
 {
     /**
      * Handle an incoming request.
@@ -16,9 +16,8 @@ class CheckUserIsActive
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && !Auth::user()->is_active) {
-            Auth::logout();
-            return response()->json(['message' => 'Hesabınız devre dışı bırakıldı.'], 403);
+        if (!Auth::check()) {
+            return response()->json(['status' => 0, 'message' => 'Yorum yapabilmek için giriş yapmalısınız.'], 401);
         }
 
         return $next($request);
