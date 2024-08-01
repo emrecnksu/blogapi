@@ -37,9 +37,11 @@ class CommentController
     {
         $validated = $request->validated();
 
+        $userId = $request->user('sanctum')->id;
+
         $comment = Comment::create([
             'post_id' => $validated['post_id'],
-            'user_id' => Auth::id(),
+            'user_id' => $userId,
             'content' => $validated['content'],
             'approved' => false,
         ]);

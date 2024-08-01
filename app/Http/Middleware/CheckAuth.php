@@ -16,7 +16,8 @@ class CheckAuth
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check()) {
+        $user = $request->user('sanctum');
+        if (!$user) {
             return response()->json(['status' => 0, 'message' => 'Yorum yapabilmek için giriş yapmalısınız.'], 401);
         }
 
