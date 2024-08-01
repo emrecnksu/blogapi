@@ -39,7 +39,7 @@ class UserController
 
         if ($user && $user->is_active && Auth::attempt($credentials)) {
             $token = Auth::user()->createToken('LoginToken')->plainTextToken;
-    
+
             return response()->json([
                 'data' => [
                     'user' => new UserResource($user),

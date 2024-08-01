@@ -19,16 +19,18 @@ class UserProfileController
             $validated = $request->validated();
             $user = Auth::user();
 
-            if (!$user) {
-                return response()->json(['status' => 0, 'message' => 'Kullanıcı bulunamadı'], 404);
-            }
+            // if (!$user) {
+            //     return response()->json(['status' => 0, 'message' => 'Kullanıcı bulunamadı'], 404);
+            // }
 
             $user->update([
                 'name' => $validated['name'] ?? $user->name,
                 'surname' => $validated['surname'] ?? $user->surname,
                 'email' => $validated['email'] ?? $user->email,
                 'password' => isset($validated['new_password']) ? Hash::make($validated['new_password']) : $user->password,
-            ]);            
+            ]);
+
+            // $user->save();
 
             return (new UserResource($user))->additional(['message' => 'Profil başarıyla güncellendi.']);
         } catch (Exception $e) {

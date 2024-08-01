@@ -47,7 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('users/deactivate/{id}', [UserProfileController::class, 'deactivate']);
 
     Route::get('users/profile', [UserProfileController::class, 'show']);
-    Route::put('users/profile/update', [UserProfileController::class, 'update']);
+    Route::post('users/profile/update', [UserProfileController::class, 'update']);
     Route::post('users/profile/delete', [UserProfileController::class, 'delete']);
 
     Route::post('logout', [UserController::class, 'logout']);
