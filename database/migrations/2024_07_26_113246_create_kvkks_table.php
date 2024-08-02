@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('kvkks', function (Blueprint $table) {
             $table->id();
-            $table->text('content');
+            $table->text('text_content');
             $table->timestamps();
         });
     }

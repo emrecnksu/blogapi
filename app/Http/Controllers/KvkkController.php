@@ -10,9 +10,9 @@ class KvkkController
     /**
      * Display the KVKK content.
      */
-    public function showkvkk()
+    public function show()
     {
-        $kvkk = Kvkk::first(); 
+        $kvkk = Kvkk::latest()->first();
         return response()->json(['kvkk' => $kvkk]);
     }
 }

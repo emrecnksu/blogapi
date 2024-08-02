@@ -9,5 +9,5 @@ class Kvkk extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['content'];
+    protected $fillable = ['text_content'];
 }
