@@ -104,7 +104,7 @@ class PostResource extends Resource
                     ->getStateUsing(function ($record) {
                         return $record->tags->pluck('name')->implode(', ');
                     })
-                    ->sortable(),  
+                    ->sortable(),
                 TextColumn::make('user.name')->label('Kullanıcı'),
                 TextColumn::make('user.roles')
                     ->label('Rol')
@@ -168,3 +168,4 @@ class PostResource extends Resource
         ];
     }
 }
+

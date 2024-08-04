@@ -8,7 +8,7 @@ use App\Models\Post;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
-class ActivatePosts extends Command
+class CheckPostsStatus extends Command
 {
     /**
      * The name and signature of the console command.

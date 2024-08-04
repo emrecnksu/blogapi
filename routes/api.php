@@ -28,30 +28,25 @@ Route::post('register', [UserController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);
 
 Route::get('categories', [CategoryController::class, 'index']);
-Route::get('categories/{id}/posts', [CategoryController::class, 'posts']);
-Route::get('categories/show/{id}', [CategoryController::class, 'show']);
+Route::get('categories/{slug}/posts', [CategoryController::class, 'posts']);
+Route::get('categories/show/{slug}', [CategoryController::class, 'show']);
 
-Route::get('/posts/related/{id}', [PostController::class, 'relatedPosts']);
 Route::get('posts', [PostController::class, 'index']);
-
-Route::get('posts/show/{id}', [PostController::class, 'show']);
+Route::get('posts/related/{slug}', [PostController::class, 'relatedPosts']);
+Route::get('post/{slug}', [PostController::class, 'show']);
 
 Route::get('comments', [CommentController::class, 'index']);
+Route::post('comments', [CommentController::class, 'store'])->middleware('checkAuth');
 
 Route::get('/kvkk', [KvkkController::class, 'showkvkk']);
 
-Route::post('comments', [CommentController::class, 'store'])->middleware('checkAuth');
-
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('users/approve/{id}', [UserProfileController::class, 'approveUser']);
-    Route::post('users/deactivate/{id}', [UserProfileController::class, 'deactivate']);
-
     Route::get('users/profile', [UserProfileController::class, 'show']);
     Route::post('users/profile/update', [UserProfileController::class, 'update']);
     Route::post('users/profile/delete', [UserProfileController::class, 'delete']);
 
     Route::post('logout', [UserController::class, 'logout']);
 
-    Route::post('comments/{id}', [CommentController::class, 'update']);
-    Route::delete('comments/{id}', [CommentController::class, 'delete']);
+    Route::post('comments/update/{id}', [CommentController::class, 'update']);
+    Route::delete('comments/delete/{id}', [CommentController::class, 'delete']);
 });

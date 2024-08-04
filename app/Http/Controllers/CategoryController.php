@@ -23,9 +23,9 @@ class CategoryController
         return CategoryResource::collection($categories);
     }
 
-    public function show($id)
+    public function show($slug)
     {
-        $category = Category::find($id);
+        $category = Category::where('slug', $slug)->first();
 
         if (!$category) {
             return response()->json(['status' => 0, 'message' => 'Kategori bulunamadı'], 404);
@@ -34,10 +34,10 @@ class CategoryController
         return new CategoryResource($category);
     }
 
-    public function posts($id)
+    public function posts($slug)
     {
-        $category = Category::findOrFail($id);
-        $posts = Post::where('category_id', $id)->visible()->with('user', 'tags')->get();
+        $category = Category::where('slug', $slug)->firstOrFail();
+        $posts = Post::where('category_id', $category->id)->visible()->with('user', 'tags')->get();
 
         return response()->json([
             'status' => 1,
