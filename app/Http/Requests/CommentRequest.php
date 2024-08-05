@@ -22,7 +22,7 @@ class CommentRequest extends FormRequest
     public function rules()
     {
         return [
-            'post_id' => 'required|exists:posts,id',
+            'post_slug' => 'required|exists:posts,slug',
             'content' => 'required|string',
         ];
     }
@@ -30,8 +30,8 @@ class CommentRequest extends FormRequest
     public function messages()
     {
         return [
-            'post_id.required' => 'Post ID gereklidir.',
-            'post_id.exists' => 'Bu post ID geçersiz.',
+            'post_slug.required' => 'Post slug gereklidir.',
+            'post_slug.exists' => 'Bu post slug geçersiz.',
             'content.required' => 'Yorum içeriği boş olamaz.',
         ];
     }

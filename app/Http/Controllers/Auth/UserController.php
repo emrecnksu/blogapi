@@ -49,7 +49,6 @@ class UserController
             ]);
         } else {
             return response()->json([
-                'status' => 0,
                 'error' => 'E-posta adresi veya şifre yanlış ya da kullanıcı pasif durumda!'
             ], 401);
         }

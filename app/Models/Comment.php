@@ -16,6 +16,7 @@ class Comment extends Model
         'user_id',
         'content',
         'approved',
+        'approval_token',
     ];
 
     public function post()

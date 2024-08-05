@@ -16,7 +16,7 @@
             <p><strong>Yorum:</strong> {{ $comment->content }}</p>
             <p><strong>Yorum Atan Kişi:</strong> {{ $comment->user->name }}</p>
             <p><strong>Post:</strong> {{ $comment->post->title }}</p>
-            <p><a href="{{ url('comments/approve/' . $comment->id) }}">Yorumu Onayla</a></p>
+            <p><a href="{{ url('comments/approve/' . $comment->id . '?token=' . $comment->approval_token) }}">Yorumu Onayla</a></p>
         </div>
         <div class="footer">
             <p>Bu e-posta {{ config('app.name') }} tarafından gönderildi.</p>

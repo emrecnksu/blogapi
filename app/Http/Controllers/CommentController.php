@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -17,14 +18,15 @@ class CommentController
 
     public function index(Request $request)
     {
-        $postId = $request->query('post_id');
-        $cacheKey = $postId ? 'comments_post_'.$postId : 'comments_all';
+        $postSlug = $request->query('post_slug');
+        $cacheKey = $postSlug ? 'comments_post_'.$postSlug : 'comments_all';
 
-        $comments = Cache::remember($cacheKey, $this->cacheDuration, function() use ($postId) {
+        $comments = Cache::remember($cacheKey, $this->cacheDuration, function() use ($postSlug) {
             $commentsQuery = Comment::where('approved', true);
 
-            if ($postId) {
-                $commentsQuery = $commentsQuery->where('post_id', $postId);
+            if ($postSlug) {
+                $post = Post::where('slug', $postSlug)->firstOrFail();
+                $commentsQuery = $commentsQuery->where('post_id', $post->id);
             }
 
             return $commentsQuery->with('user')->get();
@@ -37,18 +39,20 @@ class CommentController
     {
         $validated = $request->validated();
 
+        $post = Post::where('slug', $validated['post_slug'])->firstOrFail();
         $userId = $request->user('sanctum')->id;
 
         $comment = Comment::create([
-            'post_id' => $validated['post_id'],
+            'post_id' => $post->id,
             'user_id' => $userId,
             'content' => $validated['content'],
             'approved' => false,
+            'approval_token' => (string) \Illuminate\Support\Str::uuid(), 
         ]);
 
         SendCommentNotification::dispatch($comment);
 
-        $this->clearCache($validated['post_id']);
+        $this->clearCache($post->slug);
 
         return (new CommentResource($comment))->additional(['message' => 'Yorum başarıyla eklendi ve admin onayı bekliyor.']);
     }
@@ -70,7 +74,7 @@ class CommentController
             'content' => $validated['content'],
         ]);
 
-        $this->clearCache($comment->post_id);
+        $this->clearCache($comment->post->slug);
 
         return (new CommentResource($comment))->additional(['message' => 'Yorum başarıyla güncellendi.']);
     }
@@ -87,28 +91,33 @@ class CommentController
             return response()->json(['status' => 0, 'message' => 'Bu işlemi yapmak için yetkiniz yok'], 403);
         }
 
+        $slug = $comment->post->slug;
         $comment->delete();
 
-        $this->clearCache($comment->post_id);
+        $this->clearCache($slug);
 
         return response()->json(['status' => 1, 'message' => 'Yorum başarıyla silindi.'], 200);
     }
 
-    public function approve($id)
+    public function approve(Request $request, $id)
     {
-        $comment = Comment::find($id);
+        if (!Auth::check() || !Auth::user()->hasRole('super-admin')) {
+            return response()->json(['status' => 0, 'message' => 'Bu işlemi yapmak için yetkiniz yok'], 403);
+        }
 
+        $comment = Comment::find($id);
         if (!$comment) {
             return response()->json(['status' => 0, 'message' => 'Yorum bulunamadı'], 404);
         }
 
-        if (!Auth::user()->hasRole('super-admin')) {
-            return response()->json(['status' => 0, 'message' => 'Bu işlemi yapmak için yetkiniz yok'], 403);
+        $expectedToken = $comment->approval_token;
+        if ($request->input('approval_token') !== $expectedToken) {
+            return response()->json(['status' => 0, 'message' => 'Geçersiz token'], 403);
         }
 
-        $comment->update(['approved' => true]);
+        $comment->update(['approved' => true, 'approval_token' => null]);
 
-        $this->clearCache($comment->post_id);
+        $this->clearCache($comment->post->slug);
 
         return (new CommentResource($comment))->additional(['message' => 'Yorum başarıyla onaylandı.']);
     }

@@ -52,16 +52,16 @@ class CommentResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->columns([
-            TextColumn::make('id')->label('Yorum ID'),
-            TextColumn::make('post_id')->label('Gönderi ID'),
-            TextColumn::make('user_id')->label('Kullanıcı ID'),
-            TextColumn::make('content')->label('İçerik'),
-            ToggleColumn::make('approved')->label('Onay Durumu')
-                ->onColor('success')
-                ->offColor('danger'),
-            TextColumn::make('created_at')->label('Oluşturulma Tarihi')->dateTime(),
-        ])
+            ->columns([
+                TextColumn::make('id')->label('Yorum ID'),
+                TextColumn::make('post.title')->label('Gönderi Başlığı'),
+                TextColumn::make('user.name')->label('Kullanıcı Adı'),
+                TextColumn::make('content')->label('İçerik'),
+                ToggleColumn::make('approved')->label('Onay Durumu')
+                    ->onColor('success')
+                    ->offColor('danger'),
+                TextColumn::make('created_at')->label('Oluşturulma Tarihi')->dateTime(),
+            ])
             ->filters([
                 //
             ])

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('post_id');
             $table->text('content');
             $table->boolean('approved')->default(false);
+            $table->string('approval_token')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

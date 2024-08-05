@@ -47,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('logout', [UserController::class, 'logout']);
 
+    Route::get('comments/approve/{id}', [CommentController::class, 'approve']);
     Route::post('comments/update/{id}', [CommentController::class, 'update']);
     Route::delete('comments/delete/{id}', [CommentController::class, 'delete']);
 });
