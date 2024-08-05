@@ -47,7 +47,7 @@ class CommentController
             'user_id' => $userId,
             'content' => $validated['content'],
             'approved' => false,
-            'approval_token' => (string) \Illuminate\Support\Str::uuid(), 
+            'approval_token' => (string) \Illuminate\Support\Str::uuid(),
         ]);
 
         SendCommentNotification::dispatch($comment);
@@ -111,7 +111,7 @@ class CommentController
         }
 
         $expectedToken = $comment->approval_token;
-        if ($request->input('approval_token') !== $expectedToken) {
+        if ($request->input('token') !== $expectedToken) {
             return response()->json(['status' => 0, 'message' => 'Geçersiz token'], 403);
         }
 
