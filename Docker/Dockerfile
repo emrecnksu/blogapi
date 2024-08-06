@@ -30,7 +30,7 @@ WORKDIR /var/www
 COPY . .
 
 # Laravel bağımlılıklarını yüklüyoruz
-RUN composer install --no-dev --optimize-autoloader
+# RUN composer install --no-dev --optimize-autoloader
 
 # Supervisord konfigürasyon dosyasını kopyalıyoruz
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
