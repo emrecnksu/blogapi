@@ -32,7 +32,7 @@ services:
 
 networks:
   blog-api-network:
-    external: true
+    # external: true
 
 volumes:
   mysql-data:
