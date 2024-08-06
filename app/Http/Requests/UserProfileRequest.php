@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\BaseFormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
-class UserProfileRequest extends FormRequest
+class UserProfileRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,13 +23,22 @@ class UserProfileRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'name' => 'sometimes|required|string|max:255',
-            'surname' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $this->user()->id,
-            'password' => 'sometimes|required|string|min:4',
-            'new_password' => 'sometimes|nullable|string|min:4|confirmed|different:password',
+        $rules = [
+            'name' => 'required|string|max:255',
+            'surname' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $this->user()->id,
         ];
+
+        if ($this->isMethod('post')) {
+            $rules['current_password'] = 'required|string|min:4';
+            $rules['new_password'] = 'sometimes|nullable|string|min:4|confirmed|different:current_password';
+        }
+
+        if ($this->isMethod('delete')) {
+            $rules['delete_password'] = 'required|string|min:4';
+        }
+
+        return $rules;
     }
 
     public function messages()
@@ -38,11 +49,14 @@ class UserProfileRequest extends FormRequest
             'email.required' => 'E-posta alanı boş bırakılmamalıdır.',
             'email.email' => 'Geçersiz e-posta adresi.',
             'email.unique' => 'Bu E-posta adresi zaten kullanılmaktadır.',
-            'password.min' => 'Mevcut şifre en az 4 karakter olmalıdır.',
-            'password.required' => 'Mevcut şifre alanı boş bırakılmamalıdır.',
+            'current_password.required' => 'Mevcut şifre alanı boş bırakılmamalıdır.',
+            'current_password.min' => 'Mevcut şifre en az 4 karakter olmalıdır.',
             'new_password.min' => 'Yeni şifre en az 4 karakter olmalıdır.',
             'new_password.confirmed' => 'Yeni şifreler eşleşmiyor.',
             'new_password.different' => 'Yeni şifre mevcut şifre ile aynı olamaz.',
+            'delete_password.required' => 'Mevcut şifre alanı boş bırakılmamalıdır.',
+            'delete_password.min' => 'Mevcut şifre en az 4 karakter olmalıdır.',
         ];
     }
+
 }

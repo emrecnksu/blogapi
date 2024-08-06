@@ -35,7 +35,6 @@ $schedule = app(\Illuminate\Console\Scheduling\Schedule::class);
 
 // Define the schedule intervals and their methods
 $intervals = [
-    'everyMinute' => [],
     'everyFiveMinutes' => [],
     'dailyAt' => ['00:00']
 ];
@@ -44,9 +43,9 @@ $intervals = [
 foreach ($intervals as $method => $parameters) {
     if (!empty($parameters)) {
         foreach ($parameters as $parameter) {
-            $schedule->command('app:CheckPosts-Status')->$method($parameter);
+            $schedule->command('app:check:posts-status')->$method($parameter);
         }
     } else {
-        $schedule->command('app:CheckPosts-Status')->$method();
+        $schedule->command('app:check:posts-status')->$method();
     }
 }

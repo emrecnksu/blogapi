@@ -15,7 +15,7 @@ class CheckPostsStatus extends Command
      *
      * @var string
      */
-    protected $signature = 'app:CheckPosts-Status';
+    protected $signature = 'app:check:posts-status';
 
     /**
      * The console command description.
