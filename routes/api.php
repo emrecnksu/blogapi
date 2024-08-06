@@ -36,18 +36,26 @@ Route::get('posts/related/{slug}', [PostController::class, 'relatedPosts']);
 Route::get('post/{slug}', [PostController::class, 'show']);
 
 Route::get('comments', [CommentController::class, 'index']);
-Route::post('comments', [CommentController::class, 'store'])->middleware('checkAuth');
 
 Route::get('/kvkk', [KvkkController::class, 'showkvkk']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('users/profile', [UserProfileController::class, 'show']);
-    Route::post('users/profile/update', [UserProfileController::class, 'update']);
+
+    Route::post('comments', [CommentController::class, 'store']);
+    
     Route::post('users/profile/delete', [UserProfileController::class, 'delete']);
 
     Route::post('logout', [UserController::class, 'logout']);
 
     Route::get('comments/approve/{id}', [CommentController::class, 'approve']);
     Route::post('comments/update/{id}', [CommentController::class, 'update']);
-    Route::delete('comments/delete/{id}', [CommentController::class, 'delete']);
+    Route::post('comments/delete/{id}', [CommentController::class, 'delete']);
 });
+
+Route::middleware('checkAuth')->group(function () {
+    Route::post('users/profile/update', [UserProfileController::class, 'update'])->name('profile.update');
+
+    Route::post('comments', [CommentController::class, 'store'])->name('comments.store');
+});
+

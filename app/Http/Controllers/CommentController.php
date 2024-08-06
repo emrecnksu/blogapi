@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\Post;
 use App\Models\Comment;
 use Illuminate\Http\Request;
@@ -37,29 +38,37 @@ class CommentController
 
     public function store(CommentRequest $request)
     {
-        $validated = $request->validated();
+        try {
+            $requestValidated = $request->validated();
+            $post = Post::where('slug', $requestValidated['post_slug'])->firstOrFail();
+            
+            // Auth::id() kullanarak kullanıcı kimliğini al
+            $userId = Auth::id();
+            if (!$userId) {
+                return response()->json(['message' => 'Kullanıcı oturum açmamış.'], 401);
+            }
 
-        $post = Post::where('slug', $validated['post_slug'])->firstOrFail();
-        $userId = $request->user('sanctum')->id;
+            $comment = Comment::create([
+                'post_id' => $post->id,
+                'user_id' => $userId,
+                'content' => $requestValidated['content'],
+                'approved' => false,
+                'approval_token' => (string) \Illuminate\Support\Str::uuid(),
+            ]);
 
-        $comment = Comment::create([
-            'post_id' => $post->id,
-            'user_id' => $userId,
-            'content' => $validated['content'],
-            'approved' => false,
-            'approval_token' => (string) \Illuminate\Support\Str::uuid(),
-        ]);
+            SendCommentNotification::dispatch($comment);
+            $this->clearCache($post->slug);
 
-        SendCommentNotification::dispatch($comment);
-
-        $this->clearCache($post->slug);
-
-        return (new CommentResource($comment))->additional(['message' => 'Yorum başarıyla eklendi ve admin onayı bekliyor.']);
+            return (new CommentResource($comment))->additional(['message' => 'Yorum başarıyla eklendi ve admin onayı bekliyor.']);
+        } catch (Exception $e) {
+            \Log::error('Yorum ekleme hatası: ' . $e->getMessage());
+            return response()->json(['message' => 'Yorum eklenemedi.'], 500);
+        }
     }
 
     public function update(CommentRequest $request, $id)
     {
-        $validated = $request->validated();
+        $requestValidated = $request->validated();
         $comment = Comment::find($id);
 
         if (!$comment) {
@@ -71,7 +80,7 @@ class CommentController
         }
 
         $comment->update([
-            'content' => $validated['content'],
+            'content' => $requestValidated['content'],
         ]);
 
         $this->clearCache($comment->post->slug);

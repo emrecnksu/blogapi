@@ -16,27 +16,18 @@ class CheckAuth
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user('sanctum');
+        $user = Auth::user();
+
         if (!$user) {
-            return response()->json(['status' => 0, 'message' => 'Yorum yapabilmek için giriş yapmalısınız.'], 401);
+            $routeName = $request->route()->getName();
+
+            if ($routeName === 'comments.store') {
+                return response()->json(['status' => 0, 'message' => 'Yorum yapabilmek için giriş yapmalısınız.'], 401);
+            } elseif (in_array($routeName, ['profile.update', 'profile.show', 'profile.delete'])) {
+                return response()->json(['status' => 0, 'message' => 'Profili güncelleyebilmek için giriş yapmalısınız!'], 401);
+            }
         }
 
         return $next($request);
     }
 }
-
-
-// public function handle(Request $request, Closure $next): Response
-//     {
-//         // Kullanıcı oturumunu kontrol et ve logla
-//         if (!Auth::check()) {
-//             Log::warning('Kullanıcı oturumu açık değil.', ['user' => null]);
-//             return response()->json(['status' => 0, 'message' => 'Yorum yapabilmek için giriş yapmalısınız.'], 401);
-//         }
-
-//         // Kullanıcı oturumu açık, kullanıcı bilgilerini logla
-//         $user = Auth::user();
-//         Log::info('Kullanıcı oturumu açık.', ['user' => $user]);
-
-//         return $next($request);
-//     }

@@ -16,22 +16,22 @@ class UserProfileController
     public function update(UserProfileRequest $request)
     {
         try {
-            $validated = $request->validated();
+            $requestValidated = $request->validated();
             $user = Auth::user();
 
             if (!$user) {
                 return response()->json(['status' => 0, 'message' => 'Kullanıcı bulunamadı'], 404);
             }
 
-            if (isset($validated['current_password']) && !Hash::check($validated['current_password'], $user->password)) {
+            if (isset($requestValidated['current_password']) && !Hash::check($requestValidated['current_password'], $user->password)) {
                 return response()->json(['status' => 0, 'error' => 'Mevcut şifre yanlış.'], 400);
             }
 
             $user->update([
-                'name' => $validated['name'] ?? $user->name,
-                'surname' => $validated['surname'] ?? $user->surname,
-                'email' => $validated['email'] ?? $user->email,
-                'password' => isset($validated['new_password']) ? Hash::make($validated['new_password']) : $user->password,
+                'name' => $requestValidated['name'] ?? $user->name,
+                'surname' => $requestValidated['surname'] ?? $user->surname,
+                'email' => $requestValidated['email'] ?? $user->email,
+                'password' => isset($requestValidated['new_password']) ? Hash::make($requestValidated['new_password']) : $user->password,
             ]);
 
             return (new UserResource($user))->additional(['message' => 'Profil başarıyla güncellendi.']);
@@ -64,11 +64,11 @@ class UserProfileController
             return response()->json(['status' => 0, 'error' => 'Kullanıcı bulunamadı.'], 404);
         }
 
-        $validated = $request->validate([
+        $requestValidated = $request->validate([
             'delete_password' => 'required|string|min:4',
         ]);
 
-        if (!Hash::check($validated['delete_password'], $user->password)) {
+        if (!Hash::check($requestValidated['delete_password'], $user->password)) {
             return response()->json(['status' => 0, 'error' => 'Mevcut şifre yanlış.'], 400);
         }
 

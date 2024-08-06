@@ -15,13 +15,13 @@ class UserController
 {
     public function register(RegisterRequest $request)
     {
-        $validated = $request->validated();
+        $requestValidated = $request->validated();
 
         $user = User::create([
-            'name' => $validated['name'],
-            'surname' => $validated['surname'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+            'name' => $requestValidated['name'],
+            'surname' => $requestValidated['surname'],
+            'email' => $requestValidated['email'],
+            'password' => Hash::make($requestValidated['password']),
             'is_active' => false,
         ]);
 
@@ -32,10 +32,10 @@ class UserController
 
     public function login(LoginRequest $request)
     {
-        $validated = $request->validated();
+        $requestValidated = $request->validated();
 
         $credentials = $request->only('email', 'password');
-        $user = User::where('email', $validated['email'])->first();
+        $user = User::where('email', $requestValidated['email'])->first();
 
         if ($user && $user->is_active && Auth::attempt($credentials)) {
             $token = Auth::user()->createToken('LoginToken')->plainTextToken;
