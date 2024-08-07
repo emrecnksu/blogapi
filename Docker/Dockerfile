@@ -33,7 +33,7 @@ COPY . .
 # RUN composer install --no-dev --optimize-autoloader
 
 # Supervisord konfigürasyon dosyasını kopyalıyoruz
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # start-container.sh dosyasını kopyalıyoruz
 COPY start-container /usr/local/bin/start-container

@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kvkks', function (Blueprint $table) {
+        Schema::create('text_contents', function (Blueprint $table) {
             $table->id();
+            $table->string('type'); 
             $table->text('text_content');
             $table->timestamps();
         });
@@ -23,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kvkks');
+        Schema::dropIfExists('text_contents');
     }
 };

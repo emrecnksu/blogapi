@@ -26,7 +26,7 @@ class PostController
         $cacheKey = 'post_'.$slug;
 
         $post = Cache::remember($cacheKey, $this->cacheDuration, function() use ($slug) {
-            return Post::with(['category', 'user', 'tags'])->visible()->where('slug', $slug)->firstOrFail();
+            return Post::with(['category', 'user', 'tags'])->visible()->bySlug($slug)->firstOrFail();
         });
 
         if (!$post) {
@@ -41,7 +41,7 @@ class PostController
         $cacheKey = 'related_posts_'.$slug;
 
         $relatedPosts = Cache::remember($cacheKey, $this->cacheDuration, function() use ($slug) {
-            $post = Post::where('slug', $slug)->firstOrFail();
+            $post = Post::bySlug($slug)->firstOrFail();
             $relatedPosts = Post::where('category_id', $post->category_id)
                                  ->where('id', '!=', $post->id)
                                  ->visible()

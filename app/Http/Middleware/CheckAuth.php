@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Sanctum\PersonalAccessToken;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckAuth
@@ -16,16 +17,35 @@ class CheckAuth
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $user = Auth::user();
+        $token = $request->bearerToken();
+        if ($token) {
+            $accessToken = PersonalAccessToken::findToken($token);
 
-        if (!$user) {
-            $routeName = $request->route()->getName();
-
-            if ($routeName === 'comments.store') {
-                return response()->json(['status' => 0, 'message' => 'Yorum yapabilmek için giriş yapmalısınız.'], 401);
-            } elseif (in_array($routeName, ['profile.update', 'profile.show', 'profile.delete'])) {
-                return response()->json(['status' => 0, 'message' => 'Profili güncelleyebilmek için giriş yapmalısınız!'], 401);
+            if ($accessToken && $accessToken->tokenable) {
+                Auth::setUser($accessToken->tokenable);
             }
+        }
+
+        if (!Auth::check()) {
+            $routeName = $request->route()->getName();
+            $unauthorizedMessage = 'Bu işlemi yapmak için giriş yapmalısınız!';
+            
+            $unauthorizedMessages = [
+                'comments.store' => 'Yorum yapabilmek için giriş yapmalısınız.',
+                'comments.approve' => 'Yorumu onaylamak için giriş yapmalısınız!',
+                'comments.update' => 'Yorumu güncelleyebilmek için giriş yapmalısınız!',
+                'comments.delete' => 'Yorumu silebilmek için giriş yapmalısınız!',
+                'logout' => 'Çıkış yapabilmek için giriş yapmalısınız!',
+                'profile.update' => 'Profili güncelleyebilmek için giriş yapmalısınız!',
+                'profile.show' => 'Profili görebilmek için giriş yapmalısınız!',
+                'profile.delete' => 'Profili silebilmek için giriş yapmalısınız!',
+            ];
+
+            if (array_key_exists($routeName, $unauthorizedMessages)) {
+                $unauthorizedMessage = $unauthorizedMessages[$routeName];
+            }
+
+            return response()->json(['status' => 0, 'message' => $unauthorizedMessage], 401);
         }
 
         return $next($request);

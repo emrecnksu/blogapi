@@ -10,6 +10,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\Auth\UserController;
+use App\Http\Controllers\TextContentController;
 use App\Http\Controllers\PrivacyPolicyController;
 use App\Http\Controllers\Auth\UserProfileController;
 
@@ -39,23 +40,17 @@ Route::get('comments', [CommentController::class, 'index']);
 
 Route::get('/kvkk', [KvkkController::class, 'showkvkk']);
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('users/profile', [UserProfileController::class, 'show']);
-
-    Route::post('comments', [CommentController::class, 'store']);
-    
-    Route::post('users/profile/delete', [UserProfileController::class, 'delete']);
-
-    Route::post('logout', [UserController::class, 'logout']);
-
-    Route::get('comments/approve/{id}', [CommentController::class, 'approve']);
-    Route::post('comments/update/{id}', [CommentController::class, 'update']);
-    Route::post('comments/delete/{id}', [CommentController::class, 'delete']);
-});
+Route::get('text-contents/{type}', [TextContentController::class, 'show']);
 
 Route::middleware('checkAuth')->group(function () {
+    Route::get('users/profile', [UserProfileController::class, 'show'])->name('profile.show');
     Route::post('users/profile/update', [UserProfileController::class, 'update'])->name('profile.update');
+    Route::post('users/profile/delete', [UserProfileController::class, 'delete'])->name('profile.delete');
 
     Route::post('comments', [CommentController::class, 'store'])->name('comments.store');
-});
+    Route::get('comments/approve/{id}', [CommentController::class, 'approve'])->name('comments.approve');
+    Route::post('comments/update/{id}', [CommentController::class, 'update'])->name('comments.update');
+    Route::post('comments/delete/{id}', [CommentController::class, 'delete'])->name('comments.delete');
 
+    Route::post('logout', [UserController::class, 'logout'])->name('logout');
+});

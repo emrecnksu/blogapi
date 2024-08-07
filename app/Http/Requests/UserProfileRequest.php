@@ -58,5 +58,4 @@ class UserProfileRequest extends BaseFormRequest
             'delete_password.min' => 'Mevcut şifre en az 4 karakter olmalıdır.',
         ];
     }
-
 }

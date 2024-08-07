@@ -5,16 +5,19 @@ namespace App\Http\Controllers;
 use Exception;
 use App\Models\Post;
 use App\Models\Comment;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\CommentRequest;
-use App\Jobs\SendCommentNotification;
-use Illuminate\Support\Facades\Cache;
 use App\Http\Resources\CommentResource;
+use App\Jobs\SendCommentNotification;
+use App\Traits\ResponseTrait;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 
 class CommentController
 {
+    use ResponseTrait;
+
     private $cacheDuration = 60;
 
     public function index(Request $request)
@@ -33,7 +36,7 @@ class CommentController
             return $commentsQuery->with('user')->get();
         });
 
-        return CommentResource::collection($comments);
+        return $this->successResponse(CommentResource::collection($comments));
     }
 
     public function store(CommentRequest $request)
@@ -42,10 +45,9 @@ class CommentController
             $requestValidated = $request->validated();
             $post = Post::where('slug', $requestValidated['post_slug'])->firstOrFail();
             
-            // Auth::id() kullanarak kullanıcı kimliğini al
             $userId = Auth::id();
             if (!$userId) {
-                return response()->json(['message' => 'Kullanıcı oturum açmamış.'], 401);
+                return $this->errorResponse('Kullanıcı oturum açmamış.', 401);
             }
 
             $comment = Comment::create([
@@ -59,10 +61,10 @@ class CommentController
             SendCommentNotification::dispatch($comment);
             $this->clearCache($post->slug);
 
-            return (new CommentResource($comment))->additional(['message' => 'Yorum başarıyla eklendi ve admin onayı bekliyor.']);
+            return $this->successResponse(new CommentResource($comment), 'Yorum başarıyla eklendi ve admin onayı bekliyor.');
         } catch (Exception $e) {
-            \Log::error('Yorum ekleme hatası: ' . $e->getMessage());
-            return response()->json(['message' => 'Yorum eklenemedi.'], 500);
+            Log::error('Yorum ekleme hatası: ' . $e->getMessage());
+            return $this->errorResponse('Yorum eklenemedi.', 500);
         }
     }
 
@@ -72,11 +74,11 @@ class CommentController
         $comment = Comment::find($id);
 
         if (!$comment) {
-            return response()->json(['status' => 0, 'message' => 'Yorum bulunamadı'], 404);
+            return $this->errorResponse('Yorum bulunamadı', 404);
         }
 
         if ($comment->user_id !== Auth::id()) {
-            return response()->json(['status' => 0, 'message' => 'Bu yorumu güncelleme yetkiniz yok'], 403);
+            return $this->errorResponse('Bu yorumu güncelleme yetkiniz yok', 403);
         }
 
         $comment->update([
@@ -85,7 +87,7 @@ class CommentController
 
         $this->clearCache($comment->post->slug);
 
-        return (new CommentResource($comment))->additional(['message' => 'Yorum başarıyla güncellendi.']);
+        return $this->successResponse(new CommentResource($comment), 'Yorum başarıyla güncellendi.');
     }
 
     public function delete($id)
@@ -93,11 +95,11 @@ class CommentController
         $comment = Comment::find($id);
 
         if (!$comment) {
-            return response()->json(['status' => 0, 'message' => 'Yorum bulunamadı'], 404);
+            return $this->errorResponse('Yorum bulunamadı', 404);
         }
 
         if ($comment->user_id !== Auth::id() && !Auth::user()->hasRole('super-admin')) {
-            return response()->json(['status' => 0, 'message' => 'Bu işlemi yapmak için yetkiniz yok'], 403);
+            return $this->errorResponse('Bu işlemi yapmak için yetkiniz yok', 403);
         }
 
         $slug = $comment->post->slug;
@@ -105,30 +107,30 @@ class CommentController
 
         $this->clearCache($slug);
 
-        return response()->json(['status' => 1, 'message' => 'Yorum başarıyla silindi.'], 200);
+        return $this->successResponse(null, 'Yorum başarıyla silindi.');
     }
 
     public function approve(Request $request, $id)
     {
-        if (!Auth::check() || !Auth::user()->hasRole('super-admin')) {
-            return response()->json(['status' => 0, 'message' => 'Bu işlemi yapmak için yetkiniz yok'], 403);
+        if (!Auth::user()->hasRole('super-admin')) {
+            return $this->errorResponse('Bu işlemi yapmak için yetkiniz yok', 403);
         }
 
         $comment = Comment::find($id);
         if (!$comment) {
-            return response()->json(['status' => 0, 'message' => 'Yorum bulunamadı'], 404);
+            return $this->errorResponse('Yorum bulunamadı', 404);
         }
 
         $expectedToken = $comment->approval_token;
-        if ($request->input('token') !== $expectedToken) {
-            return response()->json(['status' => 0, 'message' => 'Geçersiz token'], 403);
+        if ($request->input('approval_token') !== $expectedToken) {
+            return $this->errorResponse('Geçersiz token', 403);
         }
 
         $comment->update(['approved' => true, 'approval_token' => null]);
 
         $this->clearCache($comment->post->slug);
 
-        return (new CommentResource($comment))->additional(['message' => 'Yorum başarıyla onaylandı.']);
+        return $this->successResponse(new CommentResource($comment), 'Yorum başarıyla onaylandı.');
     }
 
     private function clearCache($postId = null)
