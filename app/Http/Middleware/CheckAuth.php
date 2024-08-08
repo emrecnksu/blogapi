@@ -7,9 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\PersonalAccessToken;
 use Symfony\Component\HttpFoundation\Response;
+use App\Traits\ResponseTrait;
 
 class CheckAuth
 {
+    use ResponseTrait;
+
     /**
      * Handle an incoming request.
      *
@@ -45,7 +48,7 @@ class CheckAuth
                 $unauthorizedMessage = $unauthorizedMessages[$routeName];
             }
 
-            return response()->json(['status' => 0, 'message' => $unauthorizedMessage], 401);
+            return $this->errorResponse($unauthorizedMessage, 401);
         }
 
         return $next($request);
