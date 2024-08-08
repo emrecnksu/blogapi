@@ -25,12 +25,9 @@ class PostResource extends JsonResource
             'image' => $this->image,
             'status' => $this->status,
             'start_date' => $this->start_date,
-            'end_date' => $this->end_date,
             'user' => new UserResource($this->whenLoaded('user')),
             'category' => new CategoryResource($this->whenLoaded('category')),
             'tags' => TagResource::collection($this->whenLoaded('tags')),
-            'created_at' => $this->created_at->toDateTimeString(),
-            'updated_at' => $this->updated_at->toDateTimeString(),
         ];
     }
 }

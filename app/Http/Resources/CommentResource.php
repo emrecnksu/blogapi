@@ -25,10 +25,7 @@ class CommentResource extends JsonResource
                 ];
             }),
             'content' => $this->content,
-            'approval_token' => $this->approval_token,
-            'approved' => $this->approved,
             'created_at' => $this->created_at->toDateTimeString(),
-            'updated_at' => $this->updated_at->toDateTimeString(),
         ];
     }
 }

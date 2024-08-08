@@ -52,4 +52,9 @@ class Category extends Model
     {
         return $query->where('status', true);
     }
+
+    public function scopeBySlug($query, $slug)
+    {
+        return $query->where('slug', $slug);
+    }
 }
