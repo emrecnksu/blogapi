@@ -28,12 +28,14 @@ class TextContentResource extends Resource
         return $form
             ->schema([
                 Select::make('type')
+                    ->label('Tür')
                     ->options([
                         'privacy_policy' => 'Gizlilik Politikası',
                         'kvkk' => 'KVKK',
                     ])
                     ->required(),
                 Textarea::make('text_content')
+                    ->label('Metin İçeriği')
                     ->required(),
             ]);
     }
@@ -42,8 +44,8 @@ class TextContentResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('type'),
-                Tables\Columns\TextColumn::make('text_content')->limit(50),
+                Tables\Columns\TextColumn::make('type')->label('Tür'),
+                Tables\Columns\TextColumn::make('text_content')->label('Metin İçeriği')->limit(50),
             ])
             ->filters([
                 //
