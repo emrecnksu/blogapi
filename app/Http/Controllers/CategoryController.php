@@ -2,33 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Post;
-use App\Models\Category;
 use App\Http\Resources\PostResource;
 use App\Http\Resources\CategoryResource;
+use App\Services\CategoryService;
 use App\Traits\ResponseTrait;
-use Illuminate\Http\Request;
 
 class CategoryController
 {
     use ResponseTrait;
 
-    public function index(Request $request)
+    protected $categoryService;
+
+    public function __construct(CategoryService $categoryService)
     {
-        $query = Category::query();
+        $this->categoryService = $categoryService;
+    }
 
-        if ($request->has('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        $categories = $query->get();
+    public function index()
+    {
+        $categories = $this->categoryService->getAllCategories();
 
         return $this->successResponse(CategoryResource::collection($categories));
     }
 
     public function show($slug)
     {
-        $category = Category::bySlug($slug)->first();
+        $category = $this->categoryService->getCategoryBySlug($slug);
 
         if (!$category) {
             return $this->errorResponse('Kategori bulunamadı', 404);
@@ -39,12 +38,11 @@ class CategoryController
 
     public function posts($slug)
     {
-        $category = Category::bySlug($slug)->firstOrFail();
-        $posts = Post::where('category_id', $category->id)->visible()->with('user', 'tags')->get();
+        $result = $this->categoryService->getPostsByCategorySlug($slug);
 
         return $this->successResponse([
-            'category' => new CategoryResource($category),
-            'posts' => PostResource::collection($posts),
+            'category' => new CategoryResource($result),
+            'posts' => PostResource::collection($result->posts),
         ]);
     }
 }
