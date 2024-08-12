@@ -19,6 +19,7 @@ class PostRepository
     public function getRelatedPosts(string $slug)
     {
         $post = Post::bySlug($slug)->firstOrFail();
+
         $relatedPosts = Post::where('category_id', $post->category_id)
                             ->where('id', '!=', $post->id)
                             ->visible()
@@ -28,14 +29,18 @@ class PostRepository
 
         if ($relatedPosts->count() < 3) {
             $additionalPosts = Post::where('id', '!=', $post->id)
-                                   ->visible()
-                                   ->take(3 - $relatedPosts->count())
-                                   ->with('category')
-                                   ->get();
+                                ->visible()
+                                ->take(3 - $relatedPosts->count())
+                                ->with('category')
+                                ->get();
 
             $relatedPosts = $relatedPosts->merge($additionalPosts);
         }
 
-        return $relatedPosts;
+        return [
+            'relatedPosts' => $relatedPosts,
+            'isCategoryRelated' => $relatedPosts->where('category_id', $post->category_id)->isNotEmpty(),
+        ];
     }
+
 }

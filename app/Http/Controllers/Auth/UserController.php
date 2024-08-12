@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\Auth;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Resources\UserResource;
 use App\Services\UserService;
 use App\Traits\ResponseTrait;
-use App\Http\Requests\LoginRequest;
-use App\Http\Resources\UserResource;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\RegisterRequest;
+use Illuminate\Http\Request;
 
 class UserController
 {
@@ -33,7 +32,7 @@ class UserController
         $token = $this->userService->login($request->validated());
 
         if ($token) {
-            $user = Auth::user();
+            $user = $request->user();
             return $this->successResponse(['user' => new UserResource($user), 'token' => $token], 'Giriş işlemi başarıyla gerçekleşti!');
         }
 
@@ -42,11 +41,13 @@ class UserController
 
     public function logout(Request $request)
     {
-        if ($request->user()) {
-            $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+
+        if ($user) {
+            $this->userService->logout($user);
             return $this->successResponse(null, 'Başarıyla çıkış yapıldı.');
         } else {
-            return $this->errorResponse('Oturumunuz açık değil. İlk önce oturum açmalısınız!', 401);
+            return $this->errorResponse('Oturumunuz açık değil ya da token bulunamadı. İlk önce oturum açmalısınız!', 401);
         }
     }
 }

@@ -25,4 +25,9 @@ class UserRepository
     {
         return $user->delete();
     }
+
+    public function revokeTokens(User $user): void
+    {
+        $user->tokens()->delete();
+    }
 }

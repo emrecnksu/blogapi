@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Repositories\UserRepository;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class UserService
 {
@@ -38,13 +38,21 @@ class UserService
         return null;
     }
 
+    public function logout(User $user): void
+    {
+        $this->userRepository->revokeTokens($user);
+    }
+
     public function updateProfile(User $user, array $data): ?User
     {
         if (isset($data['current_password']) && !Hash::check($data['current_password'], $user->password)) {
             return null;
         }
 
-        $data['password'] = isset($data['new_password']) ? Hash::make($data['new_password']) : $user->password;
+        if (isset($data['new_password'])) {
+            $data['password'] = Hash::make($data['new_password']);
+            unset($data['new_password']);
+        }
 
         $this->userRepository->update($user, $data);
 

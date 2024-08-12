@@ -36,11 +36,11 @@ class PostController
 
     public function relatedPosts($slug)
     {
-        $relatedPosts = $this->postService->getRelatedPosts($slug);
+        $relatedData = $this->postService->getRelatedPosts($slug);
 
         return $this->successResponse([
-            'relatedPosts' => PostResource::collection($relatedPosts),
-            'isCategoryRelated' => $relatedPosts->isNotEmpty(),
+            'relatedPosts' => PostResource::collection($relatedData['relatedPosts']),
+            'isCategoryRelated' => $relatedData['isCategoryRelated'],
         ]);
     }
 }
