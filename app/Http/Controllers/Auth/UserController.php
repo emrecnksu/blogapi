@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\RegisterRequest;
-use App\Http\Resources\UserResource;
+use Illuminate\Http\Request;
 use App\Services\UserService;
 use App\Traits\ResponseTrait;
-use Illuminate\Http\Request;
+use App\Http\Requests\LoginRequest;
+use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\RegisterRequest;
 
 class UserController
 {
@@ -32,7 +33,8 @@ class UserController
         $token = $this->userService->login($request->validated());
 
         if ($token) {
-            $user = $request->user();
+            $user = Auth::user();
+            
             return $this->successResponse(['user' => new UserResource($user), 'token' => $token], 'Giriş işlemi başarıyla gerçekleşti!');
         }
 
@@ -41,7 +43,7 @@ class UserController
 
     public function logout(Request $request)
     {
-        $user = $request->user();
+        $user = Auth::user();
 
         if ($user) {
             $this->userService->logout($user);
